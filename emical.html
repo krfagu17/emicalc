@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: right;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        input[type="number"], input[type="submit"], input[type="date"] {
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .container {
+            margin-bottom: 20px;
+        }
+        .results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>EMI Calculator</h1>
+    <div class="container">
+        <label for="loanAmount">Loan Amount (₹): </label>
+        <input type="number" id="loanAmount" placeholder="Enter loan amount" value="500000">
+    </div>
+    <div class="container">
+        <label for="interestRate">Annual Interest Rate (%): </label>
+        <input type="number" id="interestRate" placeholder="Enter interest rate" value="12">
+    </div>
+    <div class="container">
+        <label for="tenure">Loan Tenure (Years): </label>
+        <input type="number" id="tenure" placeholder="Enter loan tenure in years" value="5">
+    </div>
+    <div class="container">
+        <label for="disbursementDate">Disbursement Date: </label>
+        <input type="date" id="disbursementDate" value="2025-04-27">
+    </div>
+    <div class="container">
+        <label for="proposedEMIDate">Proposed EMI Date: </label>
+        <input type="date" id="proposedEMIDate" value="2025-05-05">
+    </div>
+    <div class="container">
+        <input type="submit" value="Calculate EMI" onclick="calculateEMI()">
+    </div>
+
+    <table id="emiTable" style="display:none;">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>EMI (₹)</th>
+                <th>Interest (₹)</th>
+                <th>Principal Repayment (₹)</th>
+                <th>Remaining Principal (₹)</th>
+                <th>Due Date</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div class="results" id="results" style="display:none;">
+        <p><strong>Total Interest Paid (₹): </strong><span id="totalInterest"></span></p>
+        <p><strong>Flat Rate Interest (₹): </strong><span id="flatRateInterest"></span></p>
+        <p><strong>Flat Rate Interest per Annum (%): </strong><span id="flatRateInterestPerAnnum"></span></p>
+    </div>
+
+    <script>
+        function calculateEMI() {
+            // Get input values
+            var loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            var annualInterestRate = parseFloat(document.getElementById('interestRate').value);
+            var tenureYears = parseFloat(document.getElementById('tenure').value);
+            var disbursementDate = new Date(document.getElementById('disbursementDate').value);
+            var proposedEMIDate = new Date(document.getElementById('proposedEMIDate').value);
+
+            // Calculate monthly interest rate
+            var monthlyInterestRate = (annualInterestRate / 100) / 12;
+
+            // Total number of payments
+            var totalMonths = tenureYears * 12;
+
+            // Calculate EMI using the formula
+            var emi = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, totalMonths)) /
+                      (Math.pow(1 + monthlyInterestRate, totalMonths) - 1);
+
+            // Initialize variables for tracking total interest
+            var totalInterest = 0;
+            var flatRateInterest = loanAmount * annualInterestRate * tenureYears / 100; // Flat rate interest
+
+            // Show EMI and generate the payment schedule
+            var table = document.getElementById('emiTable');
+            var tbody = table.getElementsByTagName('tbody')[0];
+            tbody.innerHTML = "";  // Clear previous results
+            table.style.display = 'block';
+            document.getElementById('results').style.display = 'block';
+
+            var remainingPrincipal = loanAmount;
+            var currentDate = new Date(proposedEMIDate);
+
+            // Loop through each month and calculate EMI breakdown
+            for (var month = 1; month <= totalMonths; month++) {
+                // Interest for the current month
+                var interestPayment = remainingPrincipal * monthlyInterestRate;
+
+                // Principal repayment
+                var principalPayment = emi - interestPayment;
+
+                // Update remaining principal
+                remainingPrincipal -= principalPayment;
+
+                // Accumulate total interest
+                totalInterest += interestPayment;
+
+                // Round off values to two decimal places
+                interestPayment = interestPayment.toFixed(2);
+                principalPayment = principalPayment.toFixed(2);
+                remainingPrincipal = remainingPrincipal.toFixed(2);
+
+                // Increment the current date by 1 month for each iteration
+                currentDate.setMonth(currentDate.getMonth() + 1);
+
+                // Format the due date as dd/mm/yyyy
+                var dueDate = currentDate.toLocaleDateString('en-GB');
+
+                // Add row to the table
+                var row = tbody.insertRow();
+                row.insertCell(0).textContent = month;
+                row.insertCell(1).textContent = emi.toFixed(2);
+                row.insertCell(2).textContent = interestPayment;
+                row.insertCell(3).textContent = principalPayment;
+                row.insertCell(4).textContent = remainingPrincipal;
+                row.insertCell(5).textContent = dueDate;
+            }
+
+            // Calculate Flat Rate Interest per Annum
+            var flatRateInterestPerAnnum = ((totalInterest / loanAmount) * 100) / tenureYears;
+
+            // Display total interest, flat rate interest, and flat rate interest per annum
+            document.getElementById('totalInterest').textContent = totalInterest.toFixed(2);
+            document.getElementById('flatRateInterest').textContent = flatRateInterest.toFixed(2);
+            document.getElementById('flatRateInterestPerAnnum').textContent = flatRateInterestPerAnnum.toFixed(2);
+        }
+    </script>
+
+</body>
+</html>
+
