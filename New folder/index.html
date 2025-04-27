@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1><span id="counter">0</span></h1>
+    <button id="increment-btn">Increment</button>
+    <button id="decrement-btn">Decrement</button>
+    <button id="reset-btn">Reset</button>
+</body>
+<script>
+    const counter = document.getElementById('counter')
+    let counterText = 0;
+    document.getElementById('increment-btn').addEventListener('click', () => {
+        counterText++;
+        counter.textContent = counterText;
+        if (counterText>30){
+        alert('You have reached the maximum limit')
+        counterText = 0;
+    }
+    })
+    document.getElementById('decrement-btn').addEventListener('click', () => {
+        counterText--;
+        counter.textContent = counterText;
+    })
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        counterText = 0;
+        counter.textContent = counterText;
+
+    })
+
+    
+</script>
+
+</html>
